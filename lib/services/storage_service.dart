@@ -16,7 +16,7 @@ class StorageService {
 
   Future<List<Task>> loadTasks() async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String>? encodedTasks = prefs.getStringList('tasks');
+    final List<String>? encodedTasks = await prefs.getStringList('tasks');
     if (encodedTasks == null) return [];
     return encodedTasks.map((t) {
       final data = jsonDecode(t);
@@ -26,5 +26,10 @@ class StorageService {
         isDone: data['isDone'],
       );
     }).toList();
+  }
+
+  Future<void> clearTasks() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('tasks');
   }
 }
