@@ -6,17 +6,20 @@ class StorageService {
   Future<void> saveTasks(List<Task> tasks) async {
     final prefs = await SharedPreferences.getInstance();
     List<String> encodedTasks =
-      tasks.map((t) => jsonEncode({
-      'id': t.id,
-      'title':t.title,
-      'isDone':t.isDone
-      })).toList();
-      prefs.setStringList('tasks', encodedTasks);
+        tasks.map((t) => jsonEncode({
+          'id': t.id,
+          'title': t.title,
+          'isDone': t.isDone,
+          'dueDate': t.dueDate?.toIso8601String(), // DEĞİŞTİ
+          'priority': t.priority.index,             // YENİ
+          'category': t.category,                   // YENİ
+        })).toList();
+    prefs.setStringList('tasks', encodedTasks);
   }
 
   Future<List<Task>> loadTasks() async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String>? encodedTasks = await prefs.getStringList('tasks');
+    final List<String>? encodedTasks = prefs.getStringList('tasks');
     if (encodedTasks == null) return [];
     return encodedTasks.map((t) {
       final data = jsonDecode(t);
@@ -24,6 +27,11 @@ class StorageService {
         id: data['id'],
         title: data['title'],
         isDone: data['isDone'],
+        // DEĞİŞTİ: Tarih null olabilir
+        dueDate: data['dueDate'] == null ? null : DateTime.parse(data['dueDate']),
+        // YENİ: Öncelik ve kategori okunuyor
+        priority: Priority.values[data['priority'] ?? Priority.medium.index],
+        category: data['category'] ?? 'Genel',
       );
     }).toList();
   }

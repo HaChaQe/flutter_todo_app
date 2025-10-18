@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart'; // senin HomeScreen dosyanın yolu
+import 'screens/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'providers/task_provider.dart';
+import 'services/notification_service.dart';
 
-void main() {
+void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized(); // Flutter motorunun hazır olduğundan emin ol
+  NotificationService notificationService = NotificationService();
+  await notificationService.init(); // Bildirim servisini başlat
+  await notificationService.requestPermissions(); // İzinleri iste
+
   runApp(
     ChangeNotifierProvider(
-      create: (_) => TaskProvider(),
+      create: (_) => TaskProvider(notificationService),
       child: const MyApp(),
     ),
   );
